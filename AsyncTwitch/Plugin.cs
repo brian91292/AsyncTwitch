@@ -12,7 +12,7 @@ namespace AsyncTwitch
     {
         public string Name => "Asynchronous Twitch Library";
 
-        public string Version => "1.1.5";
+        public string Version => "1.1.6";
 
         public void OnApplicationQuit()
         {  
