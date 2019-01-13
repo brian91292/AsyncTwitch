@@ -43,37 +43,32 @@ namespace AsyncTwitch
 
         public static Config LoadFromJson()
         {
-            if (File.Exists("UserData/AsyncTwitchConfig.json"))
+            Config tempConfig = new Config("", "", "");
+            try
             {
-                using (FileStream fs = new FileStream("UserData/AsyncTwitchConfig.json", FileMode.Open, FileAccess.Read))
+                if (File.Exists("UserData/AsyncTwitchConfig.json"))
                 {
-                    byte[] loadBytes = new byte[fs.Length];
-                    fs.Read(loadBytes, 0, (int)fs.Length);
-                    Config tempConfig = JsonUtility.FromJson<Config>(Encoding.ASCII.GetString(loadBytes));
-                    if (!tempConfig.OauthKey.StartsWith("oauth:") && tempConfig.OauthKey != String.Empty)
+                    using (FileStream fs = new FileStream("UserData/AsyncTwitchConfig.json", FileMode.Open, FileAccess.Read))
                     {
-                        tempConfig._logger.Info("Oauth key not valid attempting to fix.");
-                        if (tempConfig.OauthKey.Contains(':'))
-                        {
-                            string[] oauthSplit = tempConfig.OauthKey.Split(':');
-                            tempConfig.OauthKey = "oauth:" + oauthSplit[1];
-                        }
-                        else
-                        {
-                            tempConfig.OauthKey = "oauth:" + tempConfig.OauthKey;
-                        }
-                    }
-                    tempConfig.ChannelName = tempConfig.ChannelName?.ToLower();
-                    tempConfig.Username = tempConfig.Username?.ToLower();
+                        byte[] loadBytes = new byte[fs.Length];
+                        fs.Read(loadBytes, 0, (int)fs.Length);
+                        tempConfig = JsonUtility.FromJson<Config>(Encoding.ASCII.GetString(loadBytes));
 
-                    return tempConfig;
+                        if (tempConfig.OauthKey != String.Empty && !tempConfig.OauthKey.ToLower().StartsWith("oauth:"))
+                            tempConfig.OauthKey = "oauth:" + tempConfig.OauthKey;
+                        tempConfig.ChannelName = tempConfig.ChannelName?.ToLower();
+                        tempConfig.Username = tempConfig.Username?.ToLower();
+
+                        return tempConfig;
+                    }
                 }
             }
-            else
+            catch (Exception e)
             {
-                CreateDefaultConfig();
-                return new Config("","","");
+                tempConfig._logger.Info($"Error when trying to read config: {e}");
             }
+            CreateDefaultConfig();
+            return tempConfig;
         }
 
         public override string ToString()

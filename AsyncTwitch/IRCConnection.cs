@@ -214,7 +214,6 @@ namespace AsyncTwitch
                 if (offset == -1)
                 {
                     _logger.Debug("Found a malformed packet.");
-                    Disconnect();
                     break;
                 }
                 byte[] processedData = new byte[offset]; //Set the length to offset + 1 to contain a full message.
@@ -226,7 +225,7 @@ namespace AsyncTwitch
                 catch(Exception e)
                 {
                     _logger.Error(e.ToString());
-                    Disconnect();
+                    Disconnect(); 
                     break;
                 }
 
@@ -237,6 +236,7 @@ namespace AsyncTwitch
                 //Time to clean up
                 try
                 {
+                    Array.Copy(nextBuffer, loadBytes, nextBuffer, 0, nextBytes); //Anything past the nextBytes is garbage data.
                     //This copy moves our readBuffer forward. This is basically a queue. Offset + 2 is to get rid of the ending CR+LF.
                     Array.Copy(readBuffer, offset + 2, readBuffer, 0, readBytes - (offset + 2));
                     readBytes -= (offset + 2);

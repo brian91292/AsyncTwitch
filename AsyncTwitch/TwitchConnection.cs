@@ -55,18 +55,25 @@ namespace AsyncTwitch
         [UsedImplicitly]
         public void StartConnection()
         {
-            lock (Instance)
+            try
             {
-                string pluginName = Assembly.GetCallingAssembly().FullName;
+                lock (Instance)
+                {
+                    string pluginName = Assembly.GetCallingAssembly().FullName;
 
-                RegisterPlugin(pluginName);
+                    RegisterPlugin(pluginName);
 
-                if (IsConnected) return;
+                    if (IsConnected) return;
 
-                _loginInfo = Config.LoadFromJson();
-                //if (_loginInfo.Username == "") return;
-                Connect("irc.twitch.tv", 6667);
-                IsConnected = true;
+                    _loginInfo = Config.LoadFromJson();
+                    //if (_loginInfo.Username == "") return;
+                    Connect("irc.twitch.tv", 6667);
+                    IsConnected = true;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Debug($"Unable to start connection with error: {e}");
             }
         }
 
